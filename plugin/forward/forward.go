@@ -207,10 +207,19 @@ func (f *Forward) PreferUDP() bool { return f.opts.preferUDP }
 
 // List returns a set of proxies to be used for this client depending on the policy in f.
 func (f *Forward) List() []*Proxy {
-	if len(f.p.List(f.proxies)) == 1 {
-		return f.p.List(f.proxies)[0].([]*Proxy)
+	var interfaceSlice []interface{} = make([]interface{}, len(f.proxies))
+	for i, p := range f.proxies {
+		interfaceSlice[i] = p
 	}
-	return nil
+
+	sortedProxies := f.p.List(interfaceSlice...)
+
+	proxies := make([]*Proxy, len(sortedProxies))
+	for i, p := range sortedProxies {
+		proxies[i] = p.(*Proxy)
+	}
+
+	return proxies
 }
 
 var (
